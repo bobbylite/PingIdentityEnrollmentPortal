@@ -1,0 +1,43 @@
+@{
+    ViewData["Title"] = "Enrollment Confirmation";
+    var successMessage = TempData["SuccessMessage"] as string;
+}
+
+<div class="min-vh-100 d-flex flex-column justify-content-center align-items-center bg-light position-relative overflow-hidden">
+    <!-- Soft background gradient -->
+    <div class="position-absolute top-0 start-0 w-100 h-100 bg-gradient"
+         style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #dee2e6 100%); z-index: 0;"></div>
+
+    <!-- Accent shapes -->
+    <div class="position-absolute rounded-circle bg-success-subtle opacity-25" style="width: 300px; height: 300px; top: -100px; right: -100px;"></div>
+    <div class="position-absolute rounded-circle bg-primary-subtle opacity-25" style="width: 200px; height: 200px; bottom: -50px; left: -50px;"></div>
+
+    <!-- Card -->
+    <div class="card shadow-lg border-0 rounded-4 text-center bg-white bg-opacity-75 backdrop-blur p-5 position-relative" style="z-index: 1; max-width: 520px;">
+        <div class="mb-4">
+            <img src="/images/GetChattyLogo.png" alt="GetChatty Logo" style="width: 120px;" class="mb-3" />
+            <h1 class="fw-bold text-dark">Enrollment Started!</h1>
+        </div>
+
+        <div class="alert alert-success rounded-3 fw-semibold" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            @successMessage
+        </div>
+
+        <p class="text-secondary mt-3">
+            You’ll receive an email shortly with further instructions to complete your onboarding with
+            <strong>PingOne</strong>. Please check your inbox (and spam folder).
+        </p>
+
+        <div class="mt-4">
+            <a href="/" class="btn btn-outline-primary rounded-pill px-4">
+                <i class="bi bi-house-door me-2"></i> Return to Home
+            </a>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="mt-5 text-center text-muted small position-relative" style="z-index: 1;">
+        <p class="mb-0">&copy; @DateTime.Now.Year GetChatty Ltd. All rights reserved.</p>
+    </footer>
+</div>
