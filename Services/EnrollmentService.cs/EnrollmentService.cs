@@ -1,3 +1,6 @@
+using Flurl;
+using Microsoft.Extensions.Options;
+using PingIdentityApp.Configuration;
 using PingIdentityApp.Models;
 using PingIdentityApp.Services.Email;
 
@@ -7,6 +10,7 @@ public class EnrollmentService : IEnrollmentService
 {
     private readonly ILogger<EnrollmentService> _logger;
     private readonly IEmailService _emailService;
+    private readonly MailGunOptions _mailGunOptions;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="EnrollmentService"/> class.
@@ -14,12 +18,15 @@ public class EnrollmentService : IEnrollmentService
     /// <param name="logger"></param>
     public EnrollmentService(
         ILogger<EnrollmentService> logger,
-        IEmailService emailService
+        IEmailService emailService,
+        IOptions<MailGunOptions> mailGunOptions
     )
     {
         ArgumentNullException.ThrowIfNull(logger);
         ArgumentNullException.ThrowIfNull(emailService);
-
+        ArgumentNullException.ThrowIfNull(mailGunOptions);
+        
+        _mailGunOptions = mailGunOptions.Value;
         _logger = logger;
         _emailService = emailService;
 
@@ -43,11 +50,13 @@ public class EnrollmentService : IEnrollmentService
             Status = "Pending",
             CreatedAt = DateTime.UtcNow
         };
-
+        var magicLink = _mailGunOptions.MagicLinkBaseUrl
+            .AppendPathSegment("CompleteEnrollment")
+            .SetQueryParam("invitationId", invitation.InvitationId);
         var isSuccessful = await _emailService.SendEmailAsync(
             email,
             "Enrollment Invitation",
-            $"You are invited to enroll. Your invitation ID is {invitation.InvitationId}."
+            _emailService.BuildHtmlBody(magicLink)
         );
 
         if (isSuccessful)

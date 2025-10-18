@@ -18,6 +18,11 @@ public class MailGunOptions
     public const string SectionKey = "MailGun";
 
     /// <summary>
+    /// Gets or sets the base URL for magic links.
+    /// </summary>
+    public string? MagicLinkBaseUrl { get; set; }
+
+    /// <summary>
     /// Gets or sets the base URL for the MailGun API.
     /// </summary>
     public string? ApiBaseUrl { get; set; }

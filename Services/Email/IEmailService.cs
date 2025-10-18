@@ -10,4 +10,11 @@ public interface IEmailService
     /// <param name="body"></param>
     /// <returns></returns>
     Task<bool> SendEmailAsync(string to, string subject, string body);
+
+    /// <summary>
+    /// Builds the HTML body for the enrollment email.
+    /// </summary>
+    /// <param name="magicLink"></param>
+    /// <returns></returns>
+    string BuildHtmlBody(string magicLink);
 }

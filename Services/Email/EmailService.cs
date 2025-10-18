@@ -42,12 +42,12 @@ public class EmailService : IEmailService
         _logger.LogInformation("Sending email to '{To}' with subject '{Subject}'", to, subject);
         var httpClient = _httpClientFactory.CreateClient(HttpClientNames.MailGunApi);
         var mailGunEndpoint = $"{_emailOptions.Value.ApiBaseUrl}{_emailOptions.Value.SandboxDomain}/messages";
-        
+
         var url = mailGunEndpoint
             .SetQueryParam("from", _emailOptions.Value.FromEmail)
             .SetQueryParam("to", to)
             .SetQueryParam("subject", subject)
-            .SetQueryParam("text", body);
+            .SetQueryParam("html", body);
         var mailGunResponse = await httpClient.PostAsync(url, null);
 
         if (mailGunResponse.IsSuccessStatusCode)
@@ -60,5 +60,58 @@ public class EmailService : IEmailService
             _logger.LogError("Failed to send email to '{To}'. Status Code: {StatusCode}", to, mailGunResponse.StatusCode);
             return false;
         }
+    }
+    
+    /// <inheritdoc/>
+    public string BuildHtmlBody(string magicLink)
+    {
+        return $@"
+            <!DOCTYPE html>
+            <html lang=""en"">
+            <head>
+            <meta charset=""UTF-8"">
+            <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
+            <style>
+                body {{
+                font-family: 'Segoe UI', sans-serif;
+                background-color: #f8f9fa;
+                color: #333;
+                padding: 20px;
+                }}
+                .container {{
+                background: #fff;
+                border-radius: 10px;
+                padding: 30px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                max-width: 600px;
+                margin: auto;
+                }}
+                .btn {{
+                display: inline-block;
+                padding: 12px 24px;
+                margin-top: 20px;
+                background-color: #dc3545;
+                color: #fff !important;
+                text-decoration: none;
+                border-radius: 30px;
+                font-weight: 600;
+                }}
+                .btn:hover {{
+                background-color: #c82333;
+                }}
+            </style>
+            </head>
+            <body>
+            <div class=""container"">
+                <h2>Welcome to PingOne Enrollment</h2>
+                <p>You're almost there! Click below to complete your enrollment.</p>
+                <p style=""text-align:center;"">
+                <a href=""{magicLink}"" class=""btn"">Complete Enrollment</a>
+                </p>
+                <p>If the button above doesn't work, copy and paste the link below into your browser:</p>
+                <p><a href=""{magicLink}"">{magicLink}</a></p>
+            </div>
+            </body>
+            </html>";
     }
 }

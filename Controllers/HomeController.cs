@@ -56,6 +56,18 @@ public class HomeController : Controller
     }
 
     /// <summary>
+    /// CompleteEnrollment action to serve the enrollment completion page.
+    /// </summary>
+    /// <returns></returns>
+    [Route("CompleteEnrollment")]
+    public IActionResult CompleteEnrollment([FromQuery] Guid invitationId)
+    {
+        ArgumentNullException.ThrowIfNull(invitationId);
+
+        return View();
+    }
+
+    /// <summary>
     /// EnrollmentBeginConfirmation action to serve the enrollment confirmation page.
     /// </summary>
     /// <returns></returns>
