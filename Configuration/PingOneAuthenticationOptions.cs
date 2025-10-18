@@ -82,6 +82,20 @@ public class PingOneAuthenticationOptions
     /// This value is used to identify the environment ID for the PingOne application.
     /// </remarks>
     public string EnvironmentId { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the population ID for the PingOne application.
+    /// </summary>
+    /// <value>The population ID for the PingOne application.</value>
+    /// <remarks>
+    /// This value is used to identify the population ID for the PingOne application.
+    /// </remarks>
+    public string PopulationId { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the birthright group ID for the PingOne application.
+    /// </summary>
+    public string BirthRightGroupId { get; set; } = string.Empty;
 }
 
 

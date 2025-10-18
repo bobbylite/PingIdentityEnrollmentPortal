@@ -59,11 +59,67 @@ public class HomeController : Controller
     /// CompleteEnrollment action to serve the enrollment completion page.
     /// </summary>
     /// <returns></returns>
+    [HttpGet]
     [Route("CompleteEnrollment")]
     public IActionResult CompleteEnrollment([FromQuery] Guid invitationId)
     {
         ArgumentNullException.ThrowIfNull(invitationId);
 
+        return View();
+    }
+
+    /// <summary>
+    /// EnrollmentComplete action to serve the enrollment complete page.
+    /// </summary>
+    /// <returns></returns>
+    [HttpPost]
+    [Route("CompleteEnrollment")]
+    public async Task<IActionResult> CompleteEnrollment([FromForm] EnrollmentIdentity enrollmentIdentity)
+    {
+        ArgumentNullException.ThrowIfNull(enrollmentIdentity);
+
+        await _enrollmentService.CompleteEnrollmentAsync(enrollmentIdentity);
+
+        return RedirectToAction(
+            actionName: "VerifyEnrollmentIdentity",
+            routeValues: new { invitationId = enrollmentIdentity.InvitationId }
+        );
+    }
+
+    /// <summary>
+    /// VerifyEnrollmentIdentity action to serve the enrollment verification page.
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet]
+    [Route("VerifyEnrollmentIdentity")]
+    public IActionResult VerifyEnrollmentIdentity()
+    {
+        return View();
+    }
+
+    /// <summary>
+    /// VerifyEnrollmentIdentity action to serve the enrollment verification page.
+    /// </summary>
+    /// <param name="verifyEnrollmentIdentity"></param>
+    /// <returns></returns>
+    [HttpPost]
+    [Route("VerifyEnrollmentIdentity")]
+    public async Task<IActionResult> VerifyEnrollmentIdentity([FromForm] VerifyEnrollmentIdentity verifyEnrollmentIdentity)
+    {
+        ArgumentNullException.ThrowIfNull(verifyEnrollmentIdentity);
+
+        await _enrollmentService.VerifyEnrollmentIdentityAsync(verifyEnrollmentIdentity);
+
+        return RedirectToAction("CompletedEnrollment");
+    }
+
+    /// <summary>
+    /// CompletedEnrollment action to serve the enrollment completed page.
+    /// </summary>
+    /// <returns></returns>
+    [Route("CompletedEnrollment")]
+    public IActionResult CompletedEnrollment()
+    {
         return View();
     }
 

@@ -100,54 +100,7 @@ public static class WebApplicationBuilderExtensions
     {
         ArgumentNullException.ThrowIfNull(webApplicationBuilder);
 
-        webApplicationBuilder.Services.AddAuthentication(options =>
-        {
-            options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-            options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
-        })
-        .AddCookie()
-        .AddOpenIdConnect(options =>
-        {
-            var oidcOptions = webApplicationBuilder.Configuration
-                .GetSection("Authentication:Schemes:OpenIdConnect")
-                .Get<OpenIdConnectOptions>();
-            ArgumentNullException.ThrowIfNull(oidcOptions);
-            
-            options.Authority = oidcOptions.Authority; // Your OIDC issuer URL
-            options.ClientId = oidcOptions.ClientId;
-            options.ClientSecret = oidcOptions.ClientSecret;
-
-            options.ResponseType = OpenIdConnectResponseType.Code;
-
-            options.Scope.Clear();
-            options.Scope.Add("openid");
-            options.Scope.Add("profile");
-            options.Scope.Add("email");
-
-            options.CallbackPath = "/signin-oidc";
-            options.SignedOutCallbackPath = "/signout-callback-oidc";
-            options.SignedOutRedirectUri = "/";
-
-            options.SaveTokens = true;
-
-            options.TokenValidationParameters.NameClaimType = "name";
-            options.TokenValidationParameters.RoleClaimType = "role";
-
-            options.Events = new OpenIdConnectEvents
-            {
-                OnAuthenticationFailed = ctx =>
-                {
-                    Console.WriteLine($"OIDC Auth failed: {ctx.Exception}");
-                    return Task.CompletedTask;
-                },
-                OnTokenValidated = ctx =>
-                {
-                    Console.WriteLine($"OIDC Token validated for {ctx.Principal?.Identity?.Name}");
-                    return Task.CompletedTask;
-                }
-            };
-        });
-
+        webApplicationBuilder.Services.AddAuthentication();
         webApplicationBuilder.Services.AddAuthorization();
         
         return webApplicationBuilder;

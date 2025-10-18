@@ -1,0 +1,43 @@
+@using PingIdentityApp.Services.PingOne
+@inject IPingOneManagementService PingOneManagementService
+
+@{
+    ViewData["Title"] = "GetChatty Onboarding Portal";
+    var selfServiceUrl = "https://localhost:7255";
+}
+
+<div class="min-vh-100 d-flex flex-column justify-content-center align-items-center bg-light position-relative overflow-hidden">
+    <!-- Soft background gradient -->
+    <div class="position-absolute top-0 start-0 w-100 h-100 bg-gradient" 
+         style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #dee2e6 100%); z-index: 0;"></div>
+
+    <!-- Accent circles -->
+    <div class="position-absolute rounded-circle bg-danger-subtle opacity-25" style="width: 300px; height: 300px; top: -100px; right: -100px;"></div>
+    <div class="position-absolute rounded-circle bg-primary-subtle opacity-25" style="width: 200px; height: 200px; bottom: -50px; left: -50px;"></div>
+
+    <!-- Card -->
+    <div class="card shadow-lg border-0 rounded-4 text-center bg-white bg-opacity-75 backdrop-blur p-5 position-relative" style="z-index: 1; max-width: 520px;">
+        <div class="mb-4">
+            <img src="/images/GetChattyLogo.png" alt="GetChatty Logo" style="width: 120px;" class="mb-3" />
+            <h1 class="fw-bold text-dark">Thank You</h1>
+            <p class="text-secondary mb-4">
+                Your enrollment is complete. You can now access your account via our Self-Service Portal.
+            </p>
+        </div>
+
+        <a href="@selfServiceUrl"class="btn btn-danger btn-lg w-100 rounded-pill fw-semibold shadow-sm">Go to Self-Service Portal</a>
+
+
+        <!-- Footer info -->
+        <div class="mt-5">
+            <small class="text-muted">
+                Powered by <strong>Ping Identity</strong>
+            </small>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="mt-5 text-center text-muted small position-relative" style="z-index: 1;">
+        <p class="mb-0">&copy; @DateTime.Now.Year GetChatty Ltd. All rights reserved.</p>
+    </footer>
+</div>

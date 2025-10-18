@@ -1,21 +1,26 @@
+@using Microsoft.Extensions.Options
+@using PingIdentityApp.Configuration
 @using PingIdentityApp.Services.Enrollment
-
 @inject IEnrollmentService EnrollmentService
+@inject IOptionsMonitor<PingOneAuthenticationOptions> PingOneOptions
 
 @{
     ViewData["Title"] = "Complete Enrollment";
 
     // Extract the invitationId from the query string
-    var invitationId = Context.Request.Query["invitationId"].ToString();
-    var isValidInvitation = EnrollmentService.ActiveEmailInvitations.Where(i => i.InvitationId.ToString() == invitationId).Any();
+    var invitationIdStr = Context.Request.Query["invitationId"].ToString();
+    var isValidInvitation = Guid.TryParse(invitationIdStr, out var invitationId) 
+        && EnrollmentService.ActiveEmailInvitations.Any(i => i.InvitationId == invitationId);
+    var email = EnrollmentService.ActiveEmailInvitations
+        .FirstOrDefault(i => i.InvitationId == invitationId)?.Email;
+    var populationId = PingOneOptions.CurrentValue.PopulationId;
 }
 
-@if (@isValidInvitation is false)
+@if (!isValidInvitation)
 {
     <div class="alert alert-danger" role="alert">
         Invalid or expired invitation link.
     </div>
-
     return;
 }
 
@@ -29,22 +34,56 @@
             </div>
 
             <form asp-action="CompleteEnrollment" method="post" class="text-start">
-                <!-- Hidden invitationId -->
-                <input type="hidden" name="invitationId" value="@invitationId" />
+                <!-- Hidden invitationId or username if needed -->
+                <input type="hidden" name="Email" value="@email" />
+                <input type="hidden" name="Population.Id" value="@populationId" />
+                <input type="hidden" name="Password.ForceChange" value="false" />
+                <input type="hidden" name="Lifecycle.Status" value="VERIFICATION_REQUIRED" />
+                <input type="hidden" name="Lifecycle.SuppressVerificationCode" value="false" />
+                <input type="hidden" name="InvitationId" value="@invitationIdStr" />
 
+                <!-- First Name -->
+                <div class="mb-3">
+                    <label for="firstName" class="form-label fw-semibold text-secondary">First Name</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="bi bi-person-fill text-danger"></i></span>
+                        <input type="text" id="firstName" name="Name.Given" class="form-control form-control-lg rounded-end" placeholder="Enter your first name" required />
+                    </div>
+                </div>
+
+                <!-- Last Name -->
+                <div class="mb-3">
+                    <label for="lastName" class="form-label fw-semibold text-secondary">Last Name</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="bi bi-person-fill text-danger"></i></span>
+                        <input type="text" id="lastName" name="Name.Family" class="form-control form-control-lg rounded-end" placeholder="Enter your last name" required />
+                    </div>
+                </div>
+
+                <!-- Username -->
+                <div class="mb-3">
+                    <label for="username" class="form-label fw-semibold text-secondary">Username</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="bi bi-person-fill text-danger"></i></span>
+                        <input type="text" id="username" name="Username" class="form-control form-control-lg rounded-end" placeholder="Enter your username" required />
+                    </div>
+                </div>
+
+                <!-- Password -->
                 <div class="mb-3">
                     <label for="password" class="form-label fw-semibold text-secondary">Password</label>
                     <div class="input-group">
                         <span class="input-group-text bg-light"><i class="bi bi-lock-fill text-danger"></i></span>
-                        <input type="password" id="password" name="password" class="form-control form-control-lg rounded-end" placeholder="Create a password" required />
+                        <input type="password" id="password" name="Password.Value" class="form-control form-control-lg rounded-end" placeholder="Create a password" required />
                     </div>
                 </div>
 
+                <!-- Confirm Password -->
                 <div class="mb-4">
                     <label for="confirmPassword" class="form-label fw-semibold text-secondary">Confirm Password</label>
                     <div class="input-group">
                         <span class="input-group-text bg-light"><i class="bi bi-shield-lock-fill text-danger"></i></span>
-                        <input type="password" id="confirmPassword" name="confirmPassword" class="form-control form-control-lg rounded-end" placeholder="Confirm password" required />
+                        <input type="password" id="confirmPassword" name="ConfirmPassword" class="form-control form-control-lg rounded-end" placeholder="Confirm password" required />
                     </div>
                 </div>
 
