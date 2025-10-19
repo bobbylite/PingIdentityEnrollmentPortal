@@ -1,20 +1,37 @@
 using PingIdentityApp.Configuration;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.Options;
 using PingIdentityApp.Http;
 using PingIdentityApp.Services.Token;
 using PingIdentityApp.Constants;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
-using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+
 using PingIdentityApp.Services.PingOne;
 using PingIdentityApp.Services.Certification;
 using PingIdentityApp.Services.Enrollment;
 using PingIdentityApp.Services.Email;
+using PingIdentityApp.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace PingIdentityApp.Extensions;
 
 public static class WebApplicationBuilderExtensions
-{   
+{   /// <summary>
+    /// Add support for persisting data to a PostgreSQL database in Azure.
+    /// </summary>
+    /// <param name="webApplicationBuilder">A builder for web applications and services.</param>
+    /// <returns>A reference to this instance after the operation has completed.</returns>
+    public static WebApplicationBuilder AddDataPersistence(this WebApplicationBuilder webApplicationBuilder)
+    {
+        ArgumentNullException.ThrowIfNull(webApplicationBuilder);
+
+        var connectionString = webApplicationBuilder.Configuration.GetConnectionString("PostgreSqlConnection");
+
+        webApplicationBuilder.Services.AddDbContext<GetChattyDataContext>(opt =>
+            opt.UseNpgsql(connectionString));
+        webApplicationBuilder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
+        return webApplicationBuilder;
+    }
+    
     /// <summary>
     /// Add services to the application.
     /// </summary>

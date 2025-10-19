@@ -5,6 +5,7 @@ using Flurl;
 using Microsoft.Extensions.Options;
 using PingIdentityApp.Configuration;
 using PingIdentityApp.Constants;
+using PingIdentityApp.Data;
 using PingIdentityApp.Models;
 using PingIdentityApp.Services.Email;
 using PingIdentityApp.Services.PingOne;
@@ -19,6 +20,7 @@ public class EnrollmentService : IEnrollmentService
     private readonly PingOneAuthenticationOptions _pingOneOptions;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IPingOneManagementService _pingOneManagementService;
+    private readonly GetChattyDataContext _dataContext;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="EnrollmentService"/> class.
@@ -35,7 +37,8 @@ public class EnrollmentService : IEnrollmentService
         IOptions<MailGunOptions> mailGunOptions,
         IOptions<PingOneAuthenticationOptions> pingOneOptions,
         IHttpClientFactory httpClientFactory,
-        IPingOneManagementService pingOneManagementService
+        IPingOneManagementService pingOneManagementService,
+        GetChattyDataContext dataContext
     )
     {
         ArgumentNullException.ThrowIfNull(logger);
@@ -44,7 +47,9 @@ public class EnrollmentService : IEnrollmentService
         ArgumentNullException.ThrowIfNull(pingOneOptions);
         ArgumentNullException.ThrowIfNull(httpClientFactory);
         ArgumentNullException.ThrowIfNull(pingOneManagementService);
-        
+        ArgumentNullException.ThrowIfNull(dataContext);
+
+        _dataContext = dataContext;
         _httpClientFactory = httpClientFactory;
         _mailGunOptions = mailGunOptions.Value;
         _logger = logger;
@@ -128,10 +133,6 @@ public class EnrollmentService : IEnrollmentService
             User = deserializedResponse,
             InvitationId = ActiveEmailInvitations.First(i => i.InvitationId.ToString() == enrollmentIdentity.InvitationId).InvitationId.ToString()
         });
-        ActiveEmailInvitations.Remove(
-            ActiveEmailInvitations.First(i => i.Email == enrollmentIdentity.Email)
-        );
-        
     }
 
     /// <inheritdoc/>
@@ -139,6 +140,9 @@ public class EnrollmentService : IEnrollmentService
     {
         ArgumentNullException.ThrowIfNull(verifyEnrollmentIdentity);
 
+        var groupId = ActiveEmailInvitations.Where(e => e.InvitationId.ToString() == verifyEnrollmentIdentity.InvitationId)
+            .Select(e => e.GroupId)
+            .FirstOrDefault();
         var userId = EnrolledIdentities.Where(e => e.InvitationId == verifyEnrollmentIdentity.InvitationId)
             .Select(e => e.User?.Id)
             .FirstOrDefault();
@@ -153,5 +157,17 @@ public class EnrollmentService : IEnrollmentService
         verificationResponse.EnsureSuccessStatusCode();
 
         await _pingOneManagementService.ProvisionGroupMembershipAsync(userId!, _pingOneOptions.BirthRightGroupId);
+        
+        var AccessRequest = new Data.Entities.AccessRequest
+        {
+            Id = Guid.NewGuid(),
+            UserId = userId!,
+            GroupId = groupId,
+            Status = "Pending",
+            RequestedAt = DateTime.UtcNow,
+            ExpiresAt = DateTime.UtcNow.AddDays(7)
+        };
+        _dataContext.AccessRequests.Add(AccessRequest);
+        await  _dataContext.SaveChangesAsync();
     }
 }

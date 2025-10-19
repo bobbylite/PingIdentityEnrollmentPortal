@@ -11,5 +11,6 @@ public class VerifyEnrollmentIdentity
     /// <summary>
     /// The invitation ID associated with the user.
     /// </summary>
+    [JsonIgnore]
     public string? InvitationId { get; set; }
 }
