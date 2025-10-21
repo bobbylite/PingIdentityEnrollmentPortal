@@ -147,6 +147,11 @@ public class EnrollmentService : IEnrollmentService
             .Select(e => e.User?.Id)
             .FirstOrDefault();
         var verificationCode = verifyEnrollmentIdentity.VerificationCode;
+
+        var user = await _pingOneManagementService.GetUserByIdAsync(userId!);
+        ArgumentNullException.ThrowIfNull(user);
+        var group = await _pingOneManagementService.GetGroupByIdAsync(groupId!);
+        ArgumentNullException.ThrowIfNull(group);
         
         var httpClient = _httpClientFactory.CreateClient(HttpClientNames.PingOneApi);
         var serializedVerificationEnrollmentIdentity = JsonSerializer.Serialize(verifyEnrollmentIdentity);
@@ -161,11 +166,13 @@ public class EnrollmentService : IEnrollmentService
         var AccessRequest = new Data.Entities.AccessRequest
         {
             Id = Guid.NewGuid(),
-            UserId = userId!,
+            UserId = userId,
             GroupId = groupId,
-            Status = "Pending",
             RequestedAt = DateTime.UtcNow,
-            ExpiresAt = DateTime.UtcNow.AddDays(7)
+            Status = AccessRequestStatus.Pending,
+            FirstName = user?.Name?.Given,
+            LastName = user?.Name?.Family,
+            GroupName = group?.Name
         };
         _dataContext.AccessRequests.Add(AccessRequest);
         await  _dataContext.SaveChangesAsync();
