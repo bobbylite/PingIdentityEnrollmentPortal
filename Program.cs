@@ -2,6 +2,7 @@ using PingIdentityApp.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.AddDataPersistence();
 builder.AddServices();
 builder.AddPingIdentityAppApiClients();
 builder.AddAccessControl();

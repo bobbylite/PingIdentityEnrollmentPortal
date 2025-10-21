@@ -5,6 +5,7 @@ public class EnrollmentIdentity
     /// <summary>
     /// The invitation ID.
     /// </summary>
+    [JsonIgnore]
     public string? InvitationId { get; set; }
 
     /// <summary>
