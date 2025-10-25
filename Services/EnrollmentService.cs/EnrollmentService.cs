@@ -162,6 +162,11 @@ public class EnrollmentService : IEnrollmentService
         verificationResponse.EnsureSuccessStatusCode();
 
         await _pingOneManagementService.ProvisionGroupMembershipAsync(userId!, _pingOneOptions.BirthRightGroupId);
+
+        if (group.Name.Equals("basic", StringComparison.CurrentCultureIgnoreCase))
+        {
+            return;
+        }
         
         var AccessRequest = new Data.Entities.AccessRequest
         {
